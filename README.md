@@ -48,9 +48,8 @@ public class Writer {
 }
 ```
 
-If we run the program it will most likely print `a + b = 12` or `a = 0 b = 0`, but it
+If we run the program it will most likely print `a + b = 7` or `a = 0 b = 0`, but it
 could print something unexpected such as `a + b = 0` or `a = 3 b = 4`.  How could that happen?
-
 
 ![visibility issue with cache](https://curriculum-content.s3.amazonaws.com/6002/handling-shared-data-part-1/cache.png)
 
@@ -131,7 +130,7 @@ The `count++` operation is non-atomic since it can't be done as a single step.
 Data inconsistency may occur if multiple threads execute the operation.  
 
 The program below demonstrates the problem by creating
-two threads that call `counter.increment()` 1000 times each.
+two threads that call `counter.increment()` 10 times each.
 
 ```java
 import java.util.stream.IntStream;
@@ -140,9 +139,9 @@ public  class Example {
    public static void main(String[] args) throws InterruptedException {
       Counter counter = new Counter();
 
-      //each thread calls counter.increment() 1000 times
-      Thread t1 = new Thread( () -> IntStream.range(0,1000).forEach( (i) -> counter.increment()) );
-      Thread t2 = new Thread( () -> IntStream.range(0,1000).forEach( (i) -> counter.increment()) );
+      //each thread calls counter.increment() 10 times
+      Thread t1 = new Thread( () -> IntStream.range(0,10).forEach( (i) -> counter.increment()) );
+      Thread t2 = new Thread( () -> IntStream.range(0,10).forEach( (i) -> counter.increment()) );
 
       t1.start();
       t2.start();
@@ -150,16 +149,16 @@ public  class Example {
       //wait until t1 and t2 finish running
       t1.join();
       t2.join();
-      System.out.println("counter value = " + counter.getValue());  //should be 2000
+      System.out.println("counter value = " + counter.getValue());  //should be 20
    }
 }
 ```
 
-We would expect to see `2000` as the final value,
+We would expect to see `20` as the final value,
 but each time we run the program it may produce a different value:
 
 ```text
-counter value = 1934
+counter value = 18
 ```
 
 When multiple threads operate on the same data, it can
@@ -214,9 +213,9 @@ public  class Example {
     public static void main(String[] args) throws InterruptedException {
         AtomicCounter counter = new AtomicCounter();
 
-        //each thread calls counter.increment() 1000 times
-        Thread t1 = new Thread( () -> IntStream.range(0,1000).forEach( (i) -> counter.increment()) );
-        Thread t2 = new Thread( () -> IntStream.range(0,1000).forEach( (i) -> counter.increment()) );
+        //each thread calls counter.increment() 10 times
+        Thread t1 = new Thread( () -> IntStream.range(0,10).forEach( (i) -> counter.increment()) );
+        Thread t2 = new Thread( () -> IntStream.range(0,10).forEach( (i) -> counter.increment()) );
 
         t1.start();
         t2.start();
@@ -224,15 +223,15 @@ public  class Example {
         //wait until t1 and t2 finish running
         t1.join();
         t2.join();
-        System.out.println("counter value = " + counter.getValue());  // 2000
+        System.out.println("counter value = " + counter.getValue());  // 20
     }
 }
 ```
-
+ 
 The program now produces the correct result:
 
 ```text
-2000
+20
 ```
 
 ## Conclusion
@@ -242,7 +241,7 @@ atomicity issues.  We can use the `volatile` keyword to ensure all threads
 use atomic access with main memory rather than cache.  We use atomic
 classes such as `AtomicInteger` to ensure atomic operations when incrementing
 a counter.
-
+ 
 ## Resources
 
 [Java 11 AtomicInteger](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html)  
